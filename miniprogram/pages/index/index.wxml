@@ -1,0 +1,216 @@
+<view class="container">
+  <!-- 搜索栏（通栏独占一行，点击放大镜或回车触发搜索） -->
+  <view class="search-header">
+    <view class="search-input-box">
+      <view class="search-icon-btn" bindtap="onSearch">
+        <icon type="search" size="18" color="{{keyword ? '#38bdf8' : '#94a3b8'}}" />
+      </view>
+      <input
+        class="search-input"
+        placeholder="搜索电影、电视剧、动漫..."
+        placeholder-class="input-placeholder"
+        value="{{keyword}}"
+        bindinput="onInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="clear-btn" bindtap="onClear">✕</view>
+    </view>
+  </view>
+
+  <!-- 模式一：未执行搜索时，展示影视精选榜单与历史搜索 -->
+  <block wx:if="{{!hasSearched}}">
+    <!-- 历史搜索（有搜索记录时才展示） -->
+    <view wx:if="{{searchHistory.length > 0}}" class="quick-tags">
+      <view class="section-title-bar">
+        <text class="section-title">历史搜索</text>
+        <view class="clear-history-btn" bindtap="onClearHistory">清空</view>
+      </view>
+      <view class="tags-wrapper">
+        <view
+          class="tag-item"
+          wx:for="{{searchHistory}}"
+          wx:key="*this"
+          bindtap="onPickKeyword"
+          data-word="{{item}}"
+        >
+          <text class="tag-text">{{item}}</text>
+          <view
+            class="tag-del-btn"
+            catchtap="onDeleteSingleHistory"
+            data-word="{{item}}"
+          >
+            ✕
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 影视榜单专区 -->
+    <view class="rank-section">
+      <view class="section-header">
+        <view class="section-title-large">影视风向标</view>
+        <text class="section-subtitle">同步豆瓣实时热度</text>
+      </view>
+
+      <!-- 双行整齐排列展示榜单分类（电影周榜、高分电影、影视剧周榜、高分剧集等） -->
+      <view class="rank-tabs-grid">
+        <view
+          class="rank-tab {{activeHotTab === item.id ? 'active' : ''}}"
+          wx:for="{{hotLists}}"
+          wx:key="id"
+          bindtap="onHotTabChange"
+          data-id="{{item.id}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+
+      <!-- 榜单数据首次加载中骨架态 -->
+      <view wx:if="{{hotRankLoading}}" class="status-tip">
+        <text class="loading-spinner"></text>
+        <text>正在获取精选榜单...</text>
+      </view>
+
+      <!-- 榜单数据为空 -->
+      <view wx:elif="{{hotRankItems.length === 0 && !hotRankLoading}}" class="status-tip empty">
+        <text>该榜单暂无数据，请稍后重试</text>
+      </view>
+
+      <!-- 榜单海报网格 (3列流式排布) -->
+      <block wx:else>
+        <view class="rank-grid">
+          <view
+            class="rank-card"
+            wx:for="{{hotRankItems}}"
+            wx:key="id"
+            bindtap="onRankCardTap"
+            data-item="{{item}}"
+          >
+            <view class="rank-poster-box">
+              <image
+                class="rank-poster-img"
+                src="{{item.cover || '/images/default-poster.png'}}"
+                mode="aspectFill"
+                lazy-load="true"
+                referrer-policy="no-referrer"
+              />
+              <!-- 评分角标或 AI 专属发光角标 -->
+              <view wx:if="{{item.tag === 'AI漫剧'}}" class="ai-badge">
+                AI漫剧
+              </view>
+              <view wx:elif="{{item.rating}}" class="rating-badge">
+                ★ {{item.rating}}
+              </view>
+              <!-- 榜单排位序号 (前3名金色高亮) -->
+              <view class="rank-index-badge {{index < 3 ? 'top-three' : ''}}">
+                {{index + 1}}
+              </view>
+            </view>
+            <view class="rank-info">
+              <view class="rank-title ellipsis">{{item.title}}</view>
+              <view wx:if="{{item.desc}}" class="rank-desc ellipsis">{{item.desc}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 触底分页加载提示 -->
+        <view class="page-loading-footer">
+          <view wx:if="{{isPagingLoading}}" class="loading-more">
+            <text class="loading-spinner mini"></text>
+            <text>加载更多内容中...</text>
+          </view>
+          <view wx:elif="{{!hasMore && hotRankItems.length > 0}}" class="no-more-tip">
+            <text>已加载全部精选内容</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 模式二：已触发搜索，呈现多源聚合结果与筛选过滤 -->
+  <block wx:else>
+    <!-- 筛选面板：大类与排序 -->
+    <view class="filter-panel">
+      <!-- 分类横向滚动条 -->
+      <scroll-view class="category-scroll" scroll-x="true" enable-flex="true">
+        <view class="category-list">
+          <view
+            class="category-tab {{activeCategory === item.key ? 'active' : ''}}"
+            wx:for="{{categoryTabs}}"
+            wx:key="key"
+            bindtap="onCategoryChange"
+            data-key="{{item.key}}"
+          >
+            {{item.name}}
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 排序与结果信息条 -->
+      <view class="filter-bar">
+        <view class="count-tip">
+          <text>搜索到 </text>
+          <text class="highlight">{{filteredList.length}}</text> 部
+        </view>
+        <view class="sort-group">
+          <view
+            class="sort-btn {{activeSort === item.key ? 'active' : ''}}"
+            wx:for="{{sortOptions}}"
+            wx:key="key"
+            bindtap="onSortChange"
+            data-key="{{item.key}}"
+          >
+            {{item.name}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 影视卡片流展示 -->
+    <view class="search-content">
+      <view wx:if="{{loading && filteredList.length === 0}}" class="status-tip">
+        <text class="loading-spinner"></text>
+        <text>正在搜索全网资源...</text>
+      </view>
+
+      <view wx:elif="{{filteredList.length === 0 && !loading}}" class="status-tip empty">
+        <text>未检索到相关资源，可切换其它分类或更换关键词</text>
+      </view>
+
+      <view wx:else class="video-grid">
+        <view
+          class="video-card"
+          wx:for="{{filteredList}}"
+          wx:key="name"
+          bindtap="onVideoTap"
+          data-item="{{item}}"
+        >
+          <view class="poster-box">
+            <image
+              class="poster-img"
+              src="{{item.pic || '/images/default-poster.png'}}"
+              mode="aspectFill"
+              lazy-load="true"
+              referrer-policy="no-referrer"
+            />
+            <view class="source-count-badge">{{item.sources.length}} 个来源</view>
+          </view>
+          <view class="video-info">
+            <view class="video-title ellipsis">{{item.name}}</view>
+            <view class="video-meta">
+              <text wx:if="{{item.year}}">{{item.year}}</text>
+              <text wx:if="{{item.typeName}}" class="meta-dot">·</text>
+              <text wx:if="{{item.typeName}}">{{item.typeName}}</text>
+            </view>
+            <view class="sources-tags">
+              <text class="source-tag" wx:for="{{item.sources}}" wx:for-item="src" wx:key="sourceKey">
+                {{src.sourceName}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,206 @@
+.container {
+  padding: 24rpx;
+  min-height: 100vh;
+}
+
+.status-tip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 100rpx 0;
+  color: #94a3b8;
+  font-size: 28rpx;
+}
+
+.header-section {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.cover-image {
+  width: 220rpx;
+  height: 310rpx;
+  border-radius: 12rpx;
+  background-color: #1e293b;
+  flex-shrink: 0;
+}
+
+.header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  overflow: hidden;
+}
+
+.video-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 8rpx;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.meta-label {
+  color: #64748b;
+}
+
+.section-box {
+  background-color: #131b2e;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1px solid #1e293b;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 20rpx;
+}
+
+.source-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.source-list {
+  display: inline-flex;
+  gap: 16rpx;
+}
+
+.source-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #1e293b;
+  color: #94a3b8;
+  padding: 12rpx 28rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  border: 1px solid #334155;
+}
+
+.source-tab.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.source-remark {
+  font-size: 20rpx;
+  opacity: 0.8;
+  margin-top: 4rpx;
+}
+
+.episode-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+}
+
+/* 当剧集名称多为长文本（如综艺“20240506期...”或长标题）时，自动转为双列排布 */
+.episode-grid.long-text-mode {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.episode-btn {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10rpx;
+  padding: 16rpx 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+  font-size: 24rpx;
+  min-width: 0; /* 必须加，防止 flex 子元素将 Grid 单元格强行撑破溢出 */
+  box-sizing: border-box;
+}
+
+.episode-btn:active {
+  background-color: #334155;
+  color: #38bdf8;
+}
+
+.episode-btn .ellipsis {
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+
+.intro-text {
+  font-size: 26rpx;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* 优雅暗黑骨架屏动效 */
+.skeleton-wrapper {
+  padding: 10rpx 0;
+}
+
+.skeleton-header {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 48rpx;
+}
+
+.skeleton-cover {
+  width: 220rpx;
+  height: 310rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.skeleton-line {
+  border-radius: 8rpx;
+}
+
+.skeleton-section {
+  margin-top: 36rpx;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+}
+
+.skeleton-card {
+  height: 72rpx;
+  border-radius: 10rpx;
+}
+
+/* 呼吸流光扫光渐变动画 */
+.shimmer {
+  background: linear-gradient(90deg, #131b2e 25%, #1e293b 50%, #131b2e 75%);
+  background-size: 200% 100%;
+  animation: shimmer-load 1.5s infinite linear;
+}
+
+@keyframes shimmer-load {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

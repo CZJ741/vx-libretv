@@ -1,0 +1,77 @@
+<view class="container">
+  <!-- 骨架屏/加载中动效 -->
+  <view wx:if="{{loading}}" class="skeleton-wrapper">
+    <view class="skeleton-header">
+      <view class="skeleton-box skeleton-cover shimmer"></view>
+      <view class="skeleton-info">
+        <view class="skeleton-line shimmer" style="width: 75%; height: 42rpx;"></view>
+        <view class="skeleton-line shimmer" style="width: 45%; height: 28rpx; margin-top: 20rpx;"></view>
+        <view class="skeleton-line shimmer" style="width: 55%; height: 28rpx;"></view>
+        <view class="skeleton-line shimmer" style="width: 40%; height: 28rpx;"></view>
+      </view>
+    </view>
+    <view class="skeleton-section">
+      <view class="skeleton-line shimmer" style="width: 30%; height: 36rpx; margin-bottom: 24rpx;"></view>
+      <view class="skeleton-grid">
+        <view class="skeleton-card shimmer" wx:for="{{[1,2,3,4,5,6,7,8]}}" wx:key="*this"></view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{detail}}" class="detail-content">
+    <!-- 顶部封面与基本信息 -->
+    <view class="header-section">
+      <image class="cover-image" src="{{detail.pic}}" mode="aspectFill" />
+      <view class="header-info">
+        <view class="video-name">{{detail.name}}</view>
+        <view class="meta-item"><text class="meta-label">年份：</text>{{detail.year || '未知'}}</view>
+        <view class="meta-item"><text class="meta-label">类型：</text>{{detail.typeName || '未知'}}</view>
+        <view class="meta-item"><text class="meta-label">地区：</text>{{detail.area || '未知'}}</view>
+        <view class="meta-item"><text class="meta-label">导演：</text>{{detail.director || '未知'}}</view>
+        <view class="meta-item ellipsis"><text class="meta-label">主演：</text>{{detail.actor || '未知'}}</view>
+      </view>
+    </view>
+
+    <!-- 来源切换器 -->
+    <view class="section-box">
+      <view class="section-title">可用播放源 ({{sources.length}})</view>
+      <scroll-view class="source-scroll" scroll-x="true">
+        <view class="source-list">
+          <view
+            class="source-tab {{currentSourceIndex === index ? 'active' : ''}}"
+            wx:for="{{sources}}"
+            wx:key="sourceKey"
+            bindtap="onSwitchSource"
+            data-index="{{index}}"
+          >
+            <text>{{item.sourceName}}</text>
+            <text class="source-remark" wx:if="{{item.remarks}}">{{item.remarks}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 选集列表 -->
+    <view class="section-box">
+      <view class="section-title">剧集列表 (共 {{detail.episodes.length}} 集)</view>
+      <view class="episode-grid {{isLongEpisodeText ? 'long-text-mode' : ''}}">
+        <view
+          class="episode-btn"
+          wx:for="{{detail.episodes}}"
+          wx:key="url"
+          bindtap="onPlayEpisode"
+          data-index="{{index}}"
+          data-ep="{{item}}"
+        >
+          <text class="ellipsis">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 剧情简介 -->
+    <view class="section-box" wx:if="{{detail.content}}">
+      <view class="section-title">简介</view>
+      <view class="intro-text">{{detail.content}}</view>
+    </view>
+  </view>
+</view>

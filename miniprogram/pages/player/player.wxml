@@ -1,0 +1,54 @@
+<view class="player-container">
+  <!-- 原生 Video 播放组件（原生支持 HLS / M3U8） -->
+  <view class="video-wrapper">
+    <video
+      id="myVideo"
+      class="video-player"
+      src="{{playUrl}}"
+      initial-time="{{initialTime}}"
+      controls
+      autoplay
+      show-fullscreen-btn
+      show-play-btn
+      show-center-play-btn
+      enable-play-gesture
+      vslide-gesture
+      vslide-gesture-in-fullscreen
+      referrer-policy="no-referrer"
+      custom-cache="{{false}}"
+      binderror="onVideoError"
+      bindwaiting="onVideoWaiting"
+      bindtimeupdate="onTimeUpdate"
+      bindended="onVideoEnded"
+    ></video>
+  </view>
+
+  <!-- 播放信息与剧集选择面板 -->
+  <view class="control-panel">
+    <view class="title-row">
+      <view class="video-title ellipsis">{{videoName}}</view>
+      <view class="source-tag">{{sourceName}}</view>
+    </view>
+    <view class="current-episode-text">正在播放：{{episodeName}}</view>
+
+    <!-- 快捷选集列表 -->
+    <view class="episodes-section">
+      <view class="episodes-header">
+        <text class="section-title">选集 ({{episodes.length}})</text>
+      </view>
+      <scroll-view class="episodes-scroll" scroll-y="true">
+        <view class="episodes-grid {{isLongEpisodeText ? 'long-text-mode' : ''}}">
+          <view
+            class="ep-btn {{currentIndex === index ? 'active' : ''}}"
+            wx:for="{{episodes}}"
+            wx:key="url"
+            bindtap="onSelectEpisode"
+            data-index="{{index}}"
+          >
+            <text class="ellipsis">{{item.name}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>
