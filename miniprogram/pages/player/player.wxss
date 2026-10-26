@@ -6,6 +6,7 @@
 }
 
 .video-wrapper {
+  position: relative;
   width: 100%;
   height: 422rpx;
   background-color: #000000;
@@ -14,6 +15,68 @@
 .video-player {
   width: 100%;
   height: 100%;
+}
+
+/* 缓冲状态层与快捷操作条 */
+.buffering-hud {
+  position: absolute;
+  top: 24rpx;
+  left: 24rpx;
+  right: 24rpx;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 14rpx 20rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  z-index: 10;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.buffering-spinner {
+  width: 24rpx;
+  height: 24rpx;
+  border: 3rpx solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.buffering-text {
+  font-size: 22rpx;
+  color: #e2e8f0;
+  flex: 1;
+}
+
+.stall-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.hud-btn {
+  font-size: 20rpx !important;
+  padding: 6rpx 16rpx !important;
+  line-height: 1.4 !important;
+  background: #334155 !important;
+  color: #f1f5f9 !important;
+  border-radius: 6rpx !important;
+  border: none !important;
+}
+
+.hud-btn.highlight {
+  background: #2563eb !important;
+  color: #ffffff !important;
 }
 
 .control-panel {
@@ -28,7 +91,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
+  margin-bottom: 8rpx;
 }
 
 .video-title {
@@ -42,16 +105,99 @@
   background-color: #1e293b;
   color: #38bdf8;
   font-size: 22rpx;
-  padding: 4rpx 14rpx;
+  padding: 6rpx 16rpx;
   border-radius: 8rpx;
   border: 1px solid rgba(56, 189, 248, 0.3);
   margin-left: 16rpx;
 }
 
+.info-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
 .current-episode-text {
   font-size: 24rpx;
   color: #94a3b8;
-  margin-bottom: 24rpx;
+}
+
+.action-btn-group {
+  display: flex;
+  gap: 12rpx;
+}
+
+.action-btn {
+  background-color: #1e293b;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  transition: all 0.2s;
+}
+
+.action-btn:active {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+/* 换源快捷栏 */
+.sources-quick-bar {
+  display: flex;
+  align-items: center;
+  background-color: #111827;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  border: 1px solid #1f2937;
+}
+
+.quick-bar-label {
+  font-size: 22rpx;
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-right: 12rpx;
+}
+
+.sources-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.sources-list {
+  display: flex;
+  gap: 12rpx;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 18rpx;
+  background-color: #1e293b;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  color: #94a3b8;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.source-chip.active {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
+  border-color: #3b82f6;
+  font-weight: 500;
+}
+
+.switching-indicator {
+  margin-left: 6rpx;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .episodes-section {

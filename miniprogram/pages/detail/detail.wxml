@@ -44,7 +44,12 @@
             bindtap="onSwitchSource"
             data-index="{{index}}"
           >
-            <text>{{item.sourceName}}</text>
+            <view class="source-tab-header">
+              <text>{{item.sourceName}}</text>
+              <text class="speed-badge {{sourceSpeeds[item.sourceKey].tag === '极速' ? 'fast' : (sourceSpeeds[item.sourceKey].tag === '流畅' ? 'normal' : 'slow')}}" wx:if="{{sourceSpeeds[item.sourceKey]}}">
+                {{sourceSpeeds[item.sourceKey].tag}}
+              </text>
+            </view>
             <text class="source-remark" wx:if="{{item.remarks}}">{{item.remarks}}</text>
           </view>
         </view>

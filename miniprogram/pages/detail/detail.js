@@ -5,7 +5,8 @@ Page({
     loading: true,
     detail: null,
     sources: [],
-    currentSourceIndex: 0
+    currentSourceIndex: 0,
+    sourceSpeeds: {}
   },
 
   onLoad(options) {
@@ -84,6 +85,11 @@ Page({
           detail: detailData,
           isLongEpisodeText: isLongText
         });
+
+        // 触发异步多源探测与测速（不阻塞详情渲染）
+        if (epList.length > 0 && epList[0].url) {
+          this.detectSourceSpeeds(detailData.name, epList[0].url);
+        }
       } else {
         wx.showToast({
           title: (res.result && res.result.error) || '获取详情失败',
@@ -95,6 +101,36 @@ Page({
       wx.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       this.setData({ loading: false });
+    }
+  },
+
+  /**
+   * 异步轻量检测各个源的响应延迟并打标
+   */
+  async detectSourceSpeeds(videoName, currentEpUrl) {
+    const { sources, currentSourceIndex } = this.data;
+    if (!sources || sources.length <= 1) return;
+
+    // 组装探测项
+    const items = sources.map((s, idx) => ({
+      sourceKey: s.sourceKey,
+      vodId: s.vodId,
+      url: idx === currentSourceIndex ? currentEpUrl : ''
+    }));
+
+    try {
+      const res = await callCloudWithRetry('cmsProxy', {
+        action: 'pingSources',
+        items: items
+      }, 1);
+
+      if (res.result && res.result.ok && res.result.speeds) {
+        this.setData({
+          sourceSpeeds: res.result.speeds
+        });
+      }
+    } catch (e) {
+      console.warn('测速探测失败:', e);
     }
   },
 
@@ -112,14 +148,17 @@ Page({
     const { detail, sources, currentSourceIndex } = this.data;
     const currentSource = sources[currentSourceIndex];
 
-    // 将播放上下文带到播放器页面
+    // 将播放上下文带到播放器页面，包括可用播放源列表以支持播放中无缝换源
     const playData = {
       videoName: detail.name,
       episodeName: ep.name,
       playUrl: ep.url,
       episodeIndex: index,
       episodes: detail.episodes,
-      sourceName: currentSource.sourceName
+      sourceName: currentSource.sourceName,
+      sourceKey: currentSource.sourceKey,
+      sources: sources,
+      currentSourceIndex: currentSourceIndex
     };
 
     const app = getApp();

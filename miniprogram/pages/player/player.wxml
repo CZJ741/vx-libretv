@@ -14,6 +14,9 @@
       enable-play-gesture
       vslide-gesture
       vslide-gesture-in-fullscreen
+      enable-progress-gesture="{{true}}"
+      auto-pause-if-navigate="{{true}}"
+      auto-pause-if-open-native="{{true}}"
       referrer-policy="no-referrer"
       custom-cache="{{false}}"
       binderror="onVideoError"
@@ -21,15 +24,55 @@
       bindtimeupdate="onTimeUpdate"
       bindended="onVideoEnded"
     ></video>
+
+    <!-- 卡顿缓冲提示条与快速脱困工具条 -->
+    <view class="buffering-hud" wx:if="{{isBuffering}}">
+      <view class="buffering-spinner"></view>
+      <text class="buffering-text">加载缓冲中...</text>
+      <!-- 卡顿脱困快捷按钮（跳过5秒卡点 / 一键切源） -->
+      <view class="stall-actions" wx:if="{{showStallAction}}">
+        <button class="hud-btn" size="mini" bindtap="onSkipStall">跳过5秒</button>
+        <button class="hud-btn highlight" size="mini" bindtap="onQuickSwitchSource" wx:if="{{availableSources.length > 1}}">换条线路</button>
+      </view>
+    </view>
   </view>
 
   <!-- 播放信息与剧集选择面板 -->
   <view class="control-panel">
     <view class="title-row">
       <view class="video-title ellipsis">{{videoName}}</view>
-      <view class="source-tag">{{sourceName}}</view>
+      <view class="source-tag" bindtap="onOpenSourceSelector">{{sourceName}} (切换)</view>
     </view>
-    <view class="current-episode-text">正在播放：{{episodeName}}</view>
+    <view class="info-action-row">
+      <view class="current-episode-text">正在播放：{{episodeName}}</view>
+      <view class="action-btn-group">
+        <view class="action-btn" bindtap="onCopyPlayUrl">
+          <text class="icon-text">📋 复制链接</text>
+        </view>
+        <view class="action-btn" bindtap="onSkipStall" wx:if="{{currentTime > 0}}">
+          <text class="icon-text">⏩ 跳过5s</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷换源条（多源时支持直接点击秒切） -->
+    <view class="sources-quick-bar" wx:if="{{availableSources.length > 1}}">
+      <view class="quick-bar-label">换源：</view>
+      <scroll-view class="sources-scroll" scroll-x="true">
+        <view class="sources-list">
+          <view
+            class="source-chip {{currentSourceKey === item.sourceKey ? 'active' : ''}}"
+            wx:for="{{availableSources}}"
+            wx:key="sourceKey"
+            bindtap="onSelectSource"
+            data-index="{{index}}"
+          >
+            <text>{{item.sourceName}}</text>
+            <text class="switching-indicator" wx:if="{{switchingSource && currentSourceKey === item.sourceKey}}">...</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
 
     <!-- 快捷选集列表 -->
     <view class="episodes-section">

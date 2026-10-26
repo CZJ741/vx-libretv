@@ -704,6 +704,63 @@ exports.main = async (event) => {
       return { ok: true, data: detail };
     }
 
+    // 4. 视频源并发测速与健康检测 (pingSources)
+    if (action === 'pingSources') {
+      const { items } = event; // items: [{ sourceKey, vodId, url }]
+      if (!Array.isArray(items) || items.length === 0) {
+        return { ok: true, speeds: {} };
+      }
+
+      const pingTasks = items.map(async (item) => {
+        const startTime = Date.now();
+        try {
+          if (item.url) {
+            // 对 m3u8 地址发起 HEAD 请求以检测响应延迟
+            await axios.head(item.url, {
+              headers: UA_HEADERS,
+              timeout: 4000,
+              maxRedirects: 3
+            });
+            return {
+              key: item.sourceKey,
+              delay: Date.now() - startTime,
+              status: 'fast'
+            };
+          }
+          return { key: item.sourceKey, delay: 9999, status: 'unknown' };
+        } catch (err) {
+          // 若 HEAD 失败或被阻止，尝试通过微量范围请求（Range）探测
+          try {
+            await axios.get(item.url, {
+              headers: { ...UA_HEADERS, Range: 'bytes=0-512' },
+              timeout: 3000
+            });
+            return {
+              key: item.sourceKey,
+              delay: Date.now() - startTime,
+              status: 'normal'
+            };
+          } catch (e2) {
+            return {
+              key: item.sourceKey,
+              delay: 99999,
+              status: 'slow'
+            };
+          }
+        }
+      });
+
+      const results = await Promise.all(pingTasks);
+      const speeds = {};
+      for (const r of results) {
+        speeds[r.key] = {
+          delay: r.delay,
+          tag: r.delay < 800 ? '极速' : r.delay < 2000 ? '流畅' : '一般'
+        };
+      }
+      return { ok: true, speeds };
+    }
+
     return { ok: false, error: '未知 action' };
   } catch (error) {
     console.error('云函数处理异常:', error);
